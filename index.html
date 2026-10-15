@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buzzer Tone Lab - Siswa</title>
+  <style>
+    :root{
+      --bg:#f5f6fb; --ink:#182033; --muted:#667085; --line:#d9dfeb;
+      --accent:#6558e8; --accent-2:#8876fa;
+      --hero:#6c60ee;
+      --task-bg:#f2ecff; --task-line:#d8cbff;
+      --trial-bg:#eef6ff; --trial-line:#c8def8;
+      --discover-bg:#ecfbf3; --discover-line:#c6ead3;
+      --build-bg:#fff6e7; --build-line:#efd5a1;
+      --code-bg:#fff0f3; --code-line:#f3c3cf;
+      --record-bg:#eef1ff; --record-line:#cdd4ff;
+      --white:#ffffff;
+      --oct4:#efeaff; --oct4-border:#d6ccff; --oct4-ink:#5547db;
+      --oct5:#e7f6ff; --oct5-border:#bfe7fb; --oct5-ink:#1577a8;
+      --ok:#16855b; --danger:#c63e45;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;background:var(--bg);color:var(--ink);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      line-height:1.45;
+    }
+    .wrap{width:min(820px,100%);margin:auto;padding:14px 12px 36px}
+    .hero{
+      padding:22px 18px;border-radius:22px;color:#fff;
+      background:linear-gradient(135deg,#5d53e7,#8876fa);
+      box-shadow:0 10px 26px rgba(101,88,232,.16);
+    }
+    .hero h1{margin:0 0 4px;font-size:27px}
+    .hero p{margin:0;opacity:.95}
+
+    .card{
+      margin-top:12px;padding:15px;border-radius:18px;
+      border:1px solid var(--line);box-shadow:0 2px 10px rgba(18,30,66,.04);
+    }
+    .card h2{font-size:18px;margin:0 0 10px}
+    .card h3{font-size:15px;margin:0 0 7px}
+    .block-task{background:var(--task-bg);border-color:var(--task-line)}
+    .block-trial{background:var(--trial-bg);border-color:var(--trial-line)}
+    .block-discover{background:var(--discover-bg);border-color:var(--discover-line)}
+    .block-build{background:var(--build-bg);border-color:var(--build-line)}
+    .block-code{background:var(--code-bg);border-color:var(--code-line)}
+    .block-record{background:var(--record-bg);border-color:var(--record-line)}
+
+    p{margin:6px 0}
+    .small{font-size:13px;color:var(--muted)}
+    .task{display:grid;gap:7px;font-size:14px}
+    .tip{
+      padding:10px 12px;border-left:4px solid var(--accent);
+      background:rgba(255,255,255,.55);border-radius:12px;font-size:14px;margin-bottom:12px;
+    }
+    .save-note{
+      margin-top:10px;padding:10px 12px;border-radius:12px;
+      background:rgba(255,255,255,.72);border:1px solid rgba(101,88,232,.18);
+      font-size:13px;color:#3b4271;font-weight:600;
+    }
+    .save-note strong{color:#4f43d0}
+
+    .duration-title{font-size:13px;font-weight:800;color:var(--muted);margin:4px 0 7px}
+    .duration-group{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+    .duration-option{position:relative}
+    .duration-option input{position:absolute;opacity:0;pointer-events:none}
+    .duration-option label{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      min-height:58px;padding:8px;border:1px solid rgba(17,24,39,.10);border-radius:13px;
+      background:rgba(255,255,255,.82);cursor:pointer;font-weight:800;font-size:14px;text-align:center;
+    }
+    .duration-option label span{display:block;font-size:11px;color:var(--muted);font-weight:650;margin-top:2px}
+    .duration-option input:checked + label{
+      background:#eeeaff;border-color:#9c91ff;color:#4e43cf;
+      box-shadow:0 0 0 2px rgba(101,88,232,.08);
+    }
+
+    .octave-label{margin:13px 0 7px;font-size:13px;font-weight:800}
+    .octave-label:first-of-type{margin-top:0}
+    .octave-label.o4{color:var(--oct4-ink)}
+    .octave-label.o5{color:var(--oct5-ink)}
+
+    .keyboard{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    button{
+      min-height:47px;border:0;border-radius:13px;padding:9px 8px;
+      font-size:14px;font-weight:750;cursor:pointer;touch-action:manipulation;
+    }
+    .key-o4{background:var(--oct4);color:var(--oct4-ink);border:1px solid var(--oct4-border)}
+    .key-o5{background:var(--oct5);color:var(--oct5-ink);border:1px solid var(--oct5-border)}
+    .rest{background:#f0f3f7;color:#334155;border:1px solid #d7dee8}
+    .primary{background:var(--accent);color:white}
+    .secondary{background:rgba(255,255,255,.8);color:#334155;border:1px solid rgba(17,24,39,.10)}
+    .copy{background:#eaf8f2;color:#116c4a;border:1px solid #bfe8d6}
+    .danger{background:#fff0f1;color:var(--danger);border:1px solid #ffd4d7}
+    .note-meta{display:block;font-size:11px;font-weight:650;opacity:.75;margin-top:2px}
+
+    .now{
+      margin-top:10px;padding:11px 12px;border-radius:12px;
+      background:rgba(255,255,255,.75);border:1px solid rgba(17,24,39,.08);font-size:14px;
+    }
+    .now strong{font-size:17px}
+
+    .concept{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .concept>div{
+      padding:11px;border:1px solid rgba(17,24,39,.08);border-radius:12px;
+      background:rgba(255,255,255,.72);font-size:14px;
+    }
+
+    .sequence{
+      min-height:54px;display:flex;flex-wrap:wrap;align-items:center;gap:7px;
+      padding:10px;border:1px dashed #c3c9d9;border-radius:13px;background:rgba(255,255,255,.7);
+    }
+    .chip{
+      padding:7px 10px;border:1px solid rgba(17,24,39,.10);border-radius:999px;
+      background:#fff;font-size:13px;font-weight:750;cursor:pointer;
+    }
+    .chip.active{background:var(--accent);border-color:var(--accent);color:white}
+    .chip.editing{
+      background:#fff7df;border-color:#e9c96b;color:#6e5410;
+      box-shadow:0 0 0 2px rgba(233,201,107,.12);
+    }
+
+    .edit-panel{
+      display:none;margin-top:12px;padding:12px;border:1px solid #eadba7;
+      border-radius:14px;background:rgba(255,255,255,.84);
+    }
+    .edit-panel.show{display:block}
+    .edit-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+    .edit-head strong{font-size:14px}
+    .edit-note-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:7px}
+
+    .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}
+    .actions button{flex:1 1 135px}
+
+    pre{
+      margin:0;white-space:pre-wrap;word-break:break-word;
+      padding:13px;background:#111827;color:#e5e7eb;border-radius:13px;
+      font-size:12.5px;line-height:1.5;max-height:420px;overflow:auto;
+    }
+    .copy-status{min-height:20px;margin-top:7px;font-size:13px;font-weight:700;color:var(--ok)}
+    .record{
+      padding:11px 12px;border-radius:13px;background:rgba(255,255,255,.72);
+      border:1px solid rgba(17,24,39,.08);font-size:14px;
+    }
+
+    @media(max-width:520px){
+      .wrap{padding:10px 9px 28px}
+      .hero{padding:17px 14px;border-radius:17px}
+      .hero h1{font-size:23px}
+      .card{padding:13px;border-radius:15px}
+      .concept{grid-template-columns:1fr}
+      .keyboard,.edit-note-grid{grid-template-columns:repeat(4,1fr)}
+      .duration-option label{font-size:13px;padding:7px 4px}
+    }
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <h1>🎵 Buzzer Tone Lab</h1>
+    <p>Coba bunyinya dulu, lalu susun jingle-mu.</p>
+  </section>
+
+  <section class="card block-task">
+    <h2>🎯 Tantangan</h2>
+    <div class="task">
+      <div>1. Eksplorasi beberapa nada dan durasi.</div>
+      <div>2. Buat <b>satu jingle/pola bunyi</b>.</div>
+      <div>3. Gunakan minimal <b>2 variasi durasi</b>.</div>
+      <div>4. Boleh berupa potongan lagu, alarm, notifikasi, atau ciptaan sendiri.</div>
+      <div>5. Rekam layar saat hasil dimainkan dan tampilkan kode Arduino.</div>
+    </div>
+  </section>
+
+  <section class="card block-trial">
+    <h2>🎧 1. Coba Nada</h2>
+    <div class="tip">
+      Tombol di bagian ini <b>hanya untuk mendengar</b>. Nada yang dicoba tidak masuk ke jingle.
+    </div>
+
+    <div class="duration-title">Pilih durasi</div>
+    <div class="duration-group" aria-label="Durasi coba nada">
+      <div class="duration-option">
+        <input type="radio" name="trialDuration" id="trialShort" value="200">
+        <label for="trialShort">Pendek<span>200 ms</span></label>
+      </div>
+      <div class="duration-option">
+        <input type="radio" name="trialDuration" id="trialMedium" value="400" checked>
+        <label for="trialMedium">Sedang<span>400 ms</span></label>
+      </div>
+      <div class="duration-option">
+        <input type="radio" name="trialDuration" id="trialLong" value="800">
+        <label for="trialLong">Panjang<span>800 ms</span></label>
+      </div>
+    </div>
+
+    <div class="octave-label o4">Oktaf 4</div>
+    <div class="keyboard" id="trialOct4"></div>
+
+    <div class="octave-label o5">Oktaf 5</div>
+    <div class="keyboard" id="trialOct5"></div>
+
+    <div class="now" id="trialInfo">Tekan salah satu nada untuk mendengarkan.</div>
+  </section>
+
+  <section class="card block-discover">
+    <h2>🧪 Apa yang Kamu Temukan?</h2>
+    <div class="concept">
+      <div><b>Percobaan A</b><br>Coba nada yang sama pada Oktaf 4 dan Oktaf 5. Dengarkan perbedaannya.</div>
+      <div><b>Percobaan B</b><br>Coba nada yang sama dengan durasi Pendek, Sedang, dan Panjang.</div>
+    </div>
+  </section>
+
+  <section class="card block-build">
+    <h2>🎼 2. Susun Jingle</h2>
+    <p class="small">Setiap nada yang ditekan akan <b>langsung terdengar sekaligus masuk ke urutan jingle</b>.</p>
+    <div class="save-note"><strong>✓ Autosave aktif.</strong> Jika tombol back/refresh terpencet, urutan jingle tetap tersimpan di browser/perangkat ini.</div>
+
+    <div class="duration-title">Pilih durasi untuk nada berikutnya</div>
+    <div class="duration-group" aria-label="Durasi susun jingle">
+      <div class="duration-option">
+        <input type="radio" name="buildDuration" id="buildShort" value="200">
+        <label for="buildShort">Pendek<span>200 ms</span></label>
+      </div>
+      <div class="duration-option">
+        <input type="radio" name="buildDuration" id="buildMedium" value="400" checked>
+        <label for="buildMedium">Sedang<span>400 ms</span></label>
+      </div>
+      <div class="duration-option">
+        <input type="radio" name="buildDuration" id="buildLong" value="800">
+        <label for="buildLong">Panjang<span>800 ms</span></label>
+      </div>
+    </div>
+
+    <div class="octave-label o4">Oktaf 4</div>
+    <div class="keyboard" id="buildOct4"></div>
+
+    <div class="octave-label o5">Oktaf 5</div>
+    <div class="keyboard" id="buildOct5"></div>
+
+    <div style="margin-top:8px">
+      <button type="button" class="rest" id="restBtn" style="width:100%">⏸ Tambahkan Jeda</button>
+    </div>
+
+    <div style="margin-top:14px">
+      <h3>Urutan jingle</h3>
+      <p class="small">Salah di tengah? <b>Tekan nada pada urutan</b> untuk mengubah nada, durasi, atau menghapusnya.</p>
+      <div id="sequence" class="sequence">
+        <span class="small">Belum ada nada.</span>
+      </div>
+
+      <div id="editPanel" class="edit-panel">
+        <div class="edit-head">
+          <strong id="editTitle">Edit nada</strong>
+          <button type="button" class="secondary" id="cancelEditBtn">Selesai</button>
+        </div>
+
+        <div class="duration-title">Ubah durasi</div>
+        <div class="duration-group" aria-label="Durasi edit nada">
+          <div class="duration-option">
+            <input type="radio" name="editDuration" id="editShort" value="200">
+            <label for="editShort">Pendek<span>200 ms</span></label>
+          </div>
+          <div class="duration-option">
+            <input type="radio" name="editDuration" id="editMedium" value="400">
+            <label for="editMedium">Sedang<span>400 ms</span></label>
+          </div>
+          <div class="duration-option">
+            <input type="radio" name="editDuration" id="editLong" value="800">
+            <label for="editLong">Panjang<span>800 ms</span></label>
+          </div>
+        </div>
+
+        <div class="duration-title">Ganti nada</div>
+        <div class="octave-label o4">Oktaf 4</div>
+        <div class="edit-note-grid" id="editOct4"></div>
+        <div class="octave-label o5">Oktaf 5</div>
+        <div class="edit-note-grid" id="editOct5"></div>
+
+        <div class="actions">
+          <button type="button" class="secondary" id="editRestBtn">⏸ Jadikan Jeda</button>
+          <button type="button" class="danger" id="deleteSelectedBtn">🗑 Hapus Nada Ini</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="primary" id="playBtn">▶ Putar Jingle</button>
+      <button type="button" class="secondary" id="stopBtn">■ Stop</button>
+      <button type="button" class="secondary" id="undoBtn">↶ Hapus Terakhir</button>
+      <button type="button" class="danger" id="clearBtn">🗑 Mulai Jingle Baru</button>
+    </div>
+  </section>
+
+  <section class="card block-code">
+    <h2>💻 3. Kode Arduino</h2>
+    <p class="small">Kode berikut ditujukan untuk <b>passive buzzer</b> pada pin D6. Simpan kodenya jika ingin diuji pada Arduino di pertemuan berikutnya.</p>
+    <pre id="codeBox"></pre>
+    <div class="actions">
+      <button type="button" class="copy" id="copyCodeBtn">📋 Salin Kode</button>
+    </div>
+    <div id="copyStatus" class="copy-status" aria-live="polite"></div>
+  </section>
+
+  <section class="card block-record">
+    <div class="record">
+      <b>🎥 Screen record:</b><br>
+      tampilkan urutan jingle → tekan <b>Putar Jingle</b> → biarkan selesai → scroll ke <b>Kode Arduino</b> → hentikan rekaman.
+    </div>
+    <p class="small" style="margin-top:10px">
+      Saat mengumpulkan, tulis:<br>
+      <b>Frekuensi memengaruhi:</b> __________<br>
+      <b>Durasi memengaruhi:</b> __________
+    </p>
+  </section>
+</main>
+
+<script>
+(() => {
+  const STORAGE_KEY = 'buzzer-tone-lab-v6-sequence';
+  const freq = {
+    C4:262, D4:294, E4:330, F4:349, G4:392, A4:440, B4:494,
+    C5:523, D5:587, E5:659, F5:698, G5:784, A5:880, B5:988
+  };
+  const letters = ['C','D','E','F','G','A','B'];
+  const sequence = [];
+
+  const trialOct4 = document.getElementById('trialOct4');
+  const trialOct5 = document.getElementById('trialOct5');
+  const buildOct4 = document.getElementById('buildOct4');
+  const buildOct5 = document.getElementById('buildOct5');
+  const trialInfo = document.getElementById('trialInfo');
+  const sequenceEl = document.getElementById('sequence');
+  const codeBox = document.getElementById('codeBox');
+  const copyStatus = document.getElementById('copyStatus');
+  const editPanel = document.getElementById('editPanel');
+  const editTitle = document.getElementById('editTitle');
+  const editOct4 = document.getElementById('editOct4');
+  const editOct5 = document.getElementById('editOct5');
+
+  let editIndex = null;
+  let audioCtx = null;
+  let currentOsc = null;
+  let playing = false;
+  let playToken = 0;
+
+  function saveSequence(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sequence));
+    }catch(e){}
+  }
+
+  function loadSequence(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return;
+      const arr = JSON.parse(raw);
+      if(Array.isArray(arr)){
+        arr.forEach(item => {
+          if(item && typeof item.note === 'string' && typeof item.duration === 'number'){
+            if(item.note === 'REST' || freq[item.note]) sequence.push({note:item.note, duration:item.duration});
+          }
+        });
+      }
+    }catch(e){}
+  }
+
+  function clearSavedSequence(){
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  }
+
+  function selectedValue(name){
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return Number(el ? el.value : 400);
+  }
+
+  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+  async function ensureAudio(){
+    if(!audioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) throw new Error('Web Audio tidak didukung.');
+      audioCtx = new AC();
+    }
+    if(audioCtx.state === 'suspended') await audioCtx.resume();
+  }
+
+  async function sound(note, duration){
+    await ensureAudio();
+    if(currentOsc){
+      try{ currentOsc.stop(); }catch(e){}
+      currentOsc = null;
+    }
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = freq[note];
+    gain.gain.value = 0.07;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    currentOsc = osc;
+    osc.start();
+    setTimeout(() => {
+      try{ osc.stop(); }catch(e){}
+      if(currentOsc === osc) currentOsc = null;
+    }, duration);
+  }
+
+  function renderTrialGroup(container, octave, className){
+    container.innerHTML = '';
+    letters.forEach(letter => {
+      const note = letter + octave;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = className;
+      btn.innerHTML = `${note}<span class="note-meta">${freq[note]} Hz</span>`;
+      btn.addEventListener('click', async () => {
+        const duration = selectedValue('trialDuration');
+        try{
+          await sound(note, duration);
+          trialInfo.innerHTML = `<strong>${note}</strong> = ${freq[note]} Hz &nbsp;•&nbsp; durasi ${duration} ms`;
+        }catch(e){
+          trialInfo.textContent = 'Audio tidak dapat dimainkan di browser ini.';
+        }
+      });
+      container.appendChild(btn);
+    });
+  }
+
+  function renderBuildGroup(container, octave, className){
+    container.innerHTML = '';
+    letters.forEach(letter => {
+      const note = letter + octave;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = className;
+      btn.innerHTML = `${note}<span class="note-meta">${freq[note]} Hz</span>`;
+      btn.addEventListener('click', async () => {
+        const duration = selectedValue('buildDuration');
+        sequence.push({note, duration});
+        updateSequence();
+        try{ await sound(note, duration); }catch(e){}
+      });
+      container.appendChild(btn);
+    });
+  }
+
+  function setEditDuration(duration){
+    const radio = document.querySelector(`input[name="editDuration"][value="${duration}"]`);
+    if(radio) radio.checked = true;
+  }
+
+  function openEdit(index){
+    if(index < 0 || index >= sequence.length) return;
+    editIndex = index;
+    const item = sequence[index];
+    editTitle.textContent = `Edit urutan ke-${index + 1}: ${item.note === 'REST' ? 'JEDA' : item.note}`;
+    setEditDuration(item.duration);
+    editPanel.classList.add('show');
+    updateSequence(false);
+    editPanel.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  function closeEdit(){
+    editIndex = null;
+    editPanel.classList.remove('show');
+    updateSequence(false);
+  }
+
+  function replaceEditedNote(note){
+    if(editIndex === null || !sequence[editIndex]) return;
+    const duration = selectedValue('editDuration');
+    sequence[editIndex] = {note, duration};
+    editTitle.textContent = `Edit urutan ke-${editIndex + 1}: ${note === 'REST' ? 'JEDA' : note}`;
+    updateSequence();
+    if(note !== 'REST') sound(note, duration).catch(()=>{});
+  }
+
+  function renderEditGroup(container, octave, className){
+    container.innerHTML = '';
+    letters.forEach(letter => {
+      const note = letter + octave;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = className;
+      btn.innerHTML = `${note}<span class="note-meta">${freq[note]} Hz</span>`;
+      btn.addEventListener('click', () => replaceEditedNote(note));
+      container.appendChild(btn);
+    });
+  }
+
+  function updateSequence(shouldSave = true){
+    sequenceEl.innerHTML = '';
+    if(sequence.length === 0){
+      const span = document.createElement('span');
+      span.className = 'small';
+      span.textContent = 'Belum ada nada.';
+      sequenceEl.appendChild(span);
+    }else{
+      sequence.forEach((item,i) => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'chip';
+        if(editIndex === i) chip.classList.add('editing');
+        chip.dataset.index = i;
+        chip.textContent = item.note === 'REST'
+          ? `JEDA · ${item.duration} ms`
+          : `${item.note} · ${item.duration} ms`;
+        chip.title = 'Tekan untuk mengedit';
+        chip.addEventListener('click', () => openEdit(i));
+        sequenceEl.appendChild(chip);
+      });
+    }
+    codeBox.textContent = makeCode();
+    copyStatus.textContent = '';
+    if(shouldSave) saveSequence();
+  }
+
+  function makeCode(){
+    const L = [];
+    L.push('const int buzzerPin = 6;');
+    L.push('');
+    L.push('void setup() {');
+    L.push('  pinMode(buzzerPin, OUTPUT);');
+    L.push('  mainkanJingle();');
+    L.push('}');
+    L.push('');
+    L.push('void loop() {');
+    L.push('  // Jingle dimainkan sekali saat Arduino dinyalakan');
+    L.push('}');
+    L.push('');
+    L.push('void mainkanJingle() {');
+    if(sequence.length === 0){
+      L.push('  // Susun nada di Buzzer Tone Lab');
+    }else{
+      sequence.forEach(item => {
+        if(item.note === 'REST'){
+          L.push(`  delay(${item.duration});  // jeda`);
+        }else{
+          L.push(`  tone(buzzerPin, ${freq[item.note]}, ${item.duration});  // ${item.note}`);
+          L.push(`  delay(${item.duration + 60});`);
+        }
+      });
+      L.push('  noTone(buzzerPin);');
+    }
+    L.push('}');
+    return L.join('\n');
+  }
+
+  function setHighlight(i){
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    const c = document.querySelector(`.chip[data-index="${i}"]`);
+    if(c) c.classList.add('active');
+  }
+  function clearHighlight(){ document.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); }
+
+  async function playAll(){
+    if(playing || sequence.length === 0) return;
+    try{ await ensureAudio(); }catch(e){ alert('Audio tidak dapat dimainkan di browser ini.'); return; }
+    playing = true;
+    const token = ++playToken;
+    for(let i=0;i<sequence.length;i++){
+      if(token !== playToken) break;
+      setHighlight(i);
+      const item = sequence[i];
+      if(item.note === 'REST') await sleep(item.duration);
+      else { await sound(item.note, item.duration); await sleep(item.duration + 60); }
+    }
+    if(token === playToken){ playing = false; clearHighlight(); }
+  }
+
+  function stopAll(){
+    playToken++; playing = false;
+    if(currentOsc){ try{ currentOsc.stop(); }catch(e){} currentOsc = null; }
+    clearHighlight();
+  }
+
+  async function copyCode(){
+    const text = codeBox.textContent;
+    let copied = false;
+    try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(text); copied = true; } }catch(e){}
+    if(!copied){
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly',''); ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta); ta.select();
+      try{ copied = document.execCommand('copy'); }catch(e){ copied = false; }
+      document.body.removeChild(ta);
+    }
+    copyStatus.textContent = copied
+      ? '✓ Kode berhasil disalin. Simpan di Notes, Docs, atau tempat lain.'
+      : 'Belum bisa menyalin otomatis. Tekan dan tahan kode lalu salin manual.';
+  }
+
+  document.querySelectorAll('input[name="editDuration"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      if(editIndex === null || !sequence[editIndex]) return;
+      sequence[editIndex].duration = selectedValue('editDuration');
+      updateSequence();
+    });
+  });
+
+  document.getElementById('cancelEditBtn').addEventListener('click', closeEdit);
+  document.getElementById('editRestBtn').addEventListener('click', () => replaceEditedNote('REST'));
+  document.getElementById('deleteSelectedBtn').addEventListener('click', () => {
+    if(editIndex === null || !sequence[editIndex]) return;
+    sequence.splice(editIndex, 1);
+    closeEdit();
+    saveSequence();
+  });
+
+  document.getElementById('restBtn').addEventListener('click', () => {
+    sequence.push({note:'REST', duration:selectedValue('buildDuration')});
+    updateSequence();
+  });
+
+  document.getElementById('playBtn').addEventListener('click', playAll);
+  document.getElementById('stopBtn').addEventListener('click', stopAll);
+  document.getElementById('undoBtn').addEventListener('click', () => {
+    if(sequence.length) sequence.pop();
+    if(editIndex !== null && editIndex >= sequence.length){ editIndex = null; editPanel.classList.remove('show'); }
+    updateSequence();
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    const ok = confirm('Mulai jingle baru? Urutan jingle yang tersimpan akan dihapus.');
+    if(!ok) return;
+    stopAll();
+    sequence.length = 0; editIndex = null; editPanel.classList.remove('show');
+    clearSavedSequence();
+    updateSequence(false);
+  });
+
+  document.getElementById('copyCodeBtn').addEventListener('click', copyCode);
+
+  renderTrialGroup(trialOct4, 4, 'key-o4');
+  renderTrialGroup(trialOct5, 5, 'key-o5');
+  renderBuildGroup(buildOct4, 4, 'key-o4');
+  renderBuildGroup(buildOct5, 5, 'key-o5');
+  renderEditGroup(editOct4, 4, 'key-o4');
+  renderEditGroup(editOct5, 5, 'key-o5');
+  loadSequence();
+  updateSequence(false);
+})();
+</script>
+</body>
+</html>
